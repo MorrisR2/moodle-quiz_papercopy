@@ -120,7 +120,7 @@ class quiz_papercopy_report extends quiz_default_report
             echo quiz_no_questions_message($quiz, $cm, $this->context);
 
         //otherwise, if we have no action, display the index page
-        else if (!$action) 
+        } else if (!$action) 
         {
             $this->maintain_batches();
             $this->display_index($importform, $createform);
@@ -923,7 +923,6 @@ class quiz_papercopy_report extends quiz_default_report
         return $usage->get_id();
     }
 
-
     /**
      * Shuffles the given question set according to the rules specified by the user. See {@link quiz_papercopy_shuffle_modes}. 
      *
@@ -935,7 +934,6 @@ class quiz_papercopy_report extends quiz_default_report
      * @return array    An associative array of questions to be included in the quiz.
      */
 
-    /*
     static function shuffle_questions($questions, $pagination = array(), $shuffle_mode = quiz_papercopy_shuffle_modes::MODE_SHUFFLE_IGNORE_PAGES, $fix_descriptions = false, $fix_first = false, $fix_last = false)
     {
 
@@ -989,7 +987,6 @@ class quiz_papercopy_report extends quiz_default_report
                 return self::merge_pages($pages);
         }
     }
-    */
 
     /**
      * Splits an array of question data into several smaller arrays according to the quiz'z pagination.

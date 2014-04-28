@@ -192,7 +192,7 @@ class ScannedResponseSet extends ResponseSet {
         $fs = get_file_storage();
 
         // And get a reference to the context in which files are currently being stored.
-        $context = get_context_instance(CONTEXT_USER, $USER->id);
+        $context = context_user::instance($USER->id);
 
         // Get a reference to the attachments uploaded by the user.
         $attachments = $fs->get_area_files($context->id, 'user', 'draft', $attachments, 'id');
@@ -309,8 +309,7 @@ class ScannedResponseSet extends ResponseSet {
         }
 
         // And figure out the context in which they will upload files.
-        //$user_uploads_context = get_context_instance(CONTEXT_USER, $user->id);
-        $user_uploads_context = get_context_instance(CONTEXT_USER, $USER->id);
+        $user_uploads_context = context_user::instance($USER->id);
 
         // Create a new draft record for the given item, in the same format as would have been
         // created had the user uploaded the file him/herself.
