@@ -153,8 +153,8 @@ class printable_copy_helper
         $quba_id = $attempt->get_uniqueid();
 
         //get the current context from the coursemodule
-        $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-        
+        $context = context_module::instance($cm->id);
+
         //create a new print helper
         $print_helper = new self($quiz, $context);
 
@@ -191,7 +191,7 @@ class printable_copy_helper
         require_login($course, false, $cm);
 
         //and get a reference to the context
-        $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+        $context = context_module::instance($cm->id);
 
         //and return a new print helper
         return new self($quiz, $context, $course);
