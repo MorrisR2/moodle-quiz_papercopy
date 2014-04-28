@@ -43,9 +43,9 @@ class quiz_papercopy_upload_method
      * Scanned images: Scans of student work are uploaded; and respones are identified using QR codes for manual grading.
      * In a future implementation, some quesitons may be automatically graded using image recognition and scan-tron like selection areas.
      *
-     * @TODO Not yet implemented.
      */
-    const METHOD_ZIP_SCANS = 1;
+    const METHOD_MANUAL_SCANS = 1;
+
 }
 
 /**
@@ -90,11 +90,15 @@ class quiz_papercopy_import_form extends moodleform
         $mform->addElement('filepicker', 'gradedata', get_string('gradedata', 'quiz_papercopy'), array('accepted_types' => '*.csv'));
         $mform->addRule('gradedata', get_string('missingfile', 'quiz_papercopy'), 'required', null, 'server');
 
+        //attachments form
+        $mform->addElement('filemanager', 'attachments', get_string('attachedfiles', 'quiz_papercopy'), array('subdirs' => false));
+
         //add an option to select from the various entry modes
         $entry_modes = 
             array
             (
                 quiz_papercopy_upload_method::METHOD_CSV => get_string('csvfile', 'quiz_papercopy'),
+                quiz_papercopy_upload_method::METHOD_MANUAL_SCANS => get_string('scanfiles', 'quiz_papercopy')
             );
         $mform->addElement('select', 'fileformat', get_string('fileformat', 'quiz_papercopy'), $entry_modes);
 

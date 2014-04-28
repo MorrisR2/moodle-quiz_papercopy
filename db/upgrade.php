@@ -158,4 +158,21 @@ function xmldb_quiz_papercopy_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2012082904, 'quiz', 'papercopy');
     }
 
+
+    // Upgrade to 10-15-12 V1
+    if ($oldversion < 2012101501) {
+
+        // Define field id to be added to quiz_papercopy_batches
+        $table = new xmldb_table('quiz_papercopy_batches');
+        $field = new xmldb_field('entrymethod', XMLDB_TYPE_INTEGER, '3', null, XMLDB_NOTNULL, null, 0, null);
+
+        // Conditionally launch add field id
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // papercopy savepoint reached
+        upgrade_plugin_savepoint(true, 2012101501, 'quiz', 'papercopy');
+    }
+
 }

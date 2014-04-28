@@ -18,23 +18,19 @@
  * Quiz grading report version information.
  *
  * @package    quiz
- * @subpackage grading
- * @copyright  2010 The Open University
+ * @subpackage papercopy
+ * @copyright  2012 Binghamton Universtiy
+ * @author     Kyle J. Temkin <ktemkin@binghamton.edu>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+include 'phpqrcode/qrlib.php';
 
-$plugin->version  = 2012101501;
-$plugin->requires = 2011060313;
-$plugin->component = 'quiz_papercopy';
+// Only run if we have the necessary params.
+if(empty($_GET['quba']) || empty($_GET['q']) || empty($_GET['qa'])) {
+    die('Missing params.');
+}
 
-$plugin->dependencies = array
-    (
-        'theme_pdf' => 2011102700,
-        'local_quizsync' => 2012090500
-    );
-
-$plugin->stability = MATURITY_BETA;
-
+// Generate a QR Code with the relevant information.
+QRCode::png($_GET['quba'] . '|' . $_GET['q'] . '|' . $_GET['qa'], false, 'Q', 5);
 

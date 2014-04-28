@@ -78,7 +78,9 @@ $string['answerkeynumber'] = 'Answer Key #{$a}';
 $string['importmethod'] = 'Upload Method';
 $string['fileformat'] = 'File Format';
 $string['csvfile'] = 'Response Data (Scantron CSV)';
+$string['scanfiles'] = 'Hand-Graded Scans';
 $string['gradedata'] = 'Response Data';
+$string['attachedfiles'] = 'Attachments/Scans';
 $string['importdata'] = 'Import Responses';
 
 $string['missingfile'] = 'You must specify a file containing responses to upload!';
@@ -89,6 +91,7 @@ $string['allowcrossuser'] = 'Allow attempts to be moved from one user to another
 $string['donotclose'] = 'Don\'t close the quiz after the user\'s responses have been uploaded.';
 
 $string['invalidusage'] = 'Test ID provided was invalid!';
+$string['invalidformat'] = 'The File ID provided did not correspond to a valid Usage & question!';
 $string['couldnotidentify'] = 'Could not determine the user to which this test belongs.';
 $string['attemptexists'] = 'A grade was already entered for this user (and overwrite was not set.)';
 $string['conflictinguser'] = 'A grade was already entered for this exam; but it belonged to a different user (and cross-user-overwrite was not set.)';
@@ -123,3 +126,9 @@ $string['confirmdelete'] = 'Are you sure you want to permenantly delete the sele
 
 
 $string['papercopybatch'] = 'Paper Copies (batch created on {$a})';
+
+//TODO: allow this to be customized?
+$string['name'] = 'Name ______________________________________';
+
+$string['scanattached'] = 'Graded scan is attached below:';
+$string['autograde'] = 'Grade was automatically extracted from the scan above.';

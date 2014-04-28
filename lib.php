@@ -154,7 +154,7 @@ class printable_copy_helper
 
         //get the current context from the coursemodule
         $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-
+        
         //create a new print helper
         $print_helper = new self($quiz, $context);
 
@@ -201,6 +201,8 @@ class printable_copy_helper
     {
         global $PAGE, $OUTPUT;
 
+
+
         static $singleton = false;
 
         //ensure this function is only run once
@@ -221,19 +223,26 @@ class printable_copy_helper
         $PAGE->set_pagelayout('report');
 
         //start rendering the PDF
-        $OUTPUT->header();
+        echo $OUTPUT->header();
     }
 
     public static function render_pdf()
     {
         global $OUTPUT;
 
-        $OUTPUT->footer();
+        //
+        if(!optional_param('do_not_render', 0, PARAM_INT)) {
+            webkit_pdf::send_embed_headers();
+        }
+
+        //Finish rendering the PDF; and stream it to the user.
+        echo $OUTPUT->footer();
     } 
 
     public static function insert_ids($intro, $id)
     {
         //insert any additional barcodes requested
+        //TODO: replace with a barcode object
         $intro = str_replace('{testbarcode}', '<barcode type="EAN13" value="'.$id.'" label="none" style="width:20px; height: 5px;></barcode>', $intro);
 
         //and insert the testid, where appropriate
@@ -257,7 +266,8 @@ class printable_copy_helper
         if($to_zip)
         {
             //zip each of the QUBAs and send them to the user
-            $cached_file = $this->zip_question_usage_by_activities($usage_ids, $batch_mode, true, 'quiz', $batch_id);
+            //TODO: Switch this to keyword arguments?
+            $cached_file = $this->zip_question_usage_by_activities($usage_ids, $batch_mode, true, 'quiz', $batch_id, null, true, true, $batch_info->entrymethod);
 
             //save the cached file for future use
             $this->save_prerendered($batch_id, $cached_file, $batch_mode);
@@ -265,7 +275,7 @@ class printable_copy_helper
         //otherwise, send a single PDF containing the entire batch
         else
         {
-            $this->print_question_usage_by_activities($usage_ids, $batch_mode);
+            $this->print_question_usage_by_activities($usage_ids, $batch_mode, $batch_info->entrymethod);
         }
     }
    
@@ -277,6 +287,7 @@ class printable_copy_helper
         $PAGE->navbar->add('Paper Copies');
         $PAGE->set_pagetype('report');
 
+        // Start rendering the main, non-PDF page.
         echo $OUTPUT->header();
 
         //TODO: implement
@@ -287,6 +298,7 @@ class printable_copy_helper
         //perform the actual prerender
         $this->prerender_batch($batch_id, $force_rerender, array($this, 'interactive_prerender_callback'));
 
+        // Finish rendering the page.
         echo $OUTPUT->footer();
     }
 
@@ -370,7 +382,15 @@ class printable_copy_helper
     }
 
 
-    public function zip_question_usage_by_activities($quba_array, $batch_mode = quiz_papercopy_batch_mode::NORMAL, $output = true, $prefix='quiz', $cache_id = 0, $progress_callback = null, $save = true, $allow_disconnect = true)
+    /**
+     * Creates a zip file containing the PDF for several paper copies, based on the provided Question Usages.
+     * Can return the full zip file, or can stream it directly to the user.
+     *
+     * TODO: Switch to keyword-args-esque array?
+     * 
+     * @param $quba_array array An array containing the qubaids for each QUBA to be included.
+     */
+    public function zip_question_usage_by_activities($quba_array, $batch_mode = quiz_papercopy_batch_mode::NORMAL, $output = true, $prefix='quiz', $cache_id = 0, $progress_callback = null, $save = true, $allow_disconnect = true, $include_barcodes = false)
     {
         global $DB;
 
@@ -421,7 +441,7 @@ class printable_copy_helper
             set_time_limit(1024);
 
             //convert the QUBA into a PDF
-            $pdf = $this->print_quba_to_pdf($quba_id, $batch_mode);
+            $pdf = $this->print_quba_to_pdf($quba_id, $batch_mode, $include_barcodes);
 
             //debug
             error_log("PDF copy ".$quba_id."\n");
@@ -505,7 +525,7 @@ class printable_copy_helper
     }
      
 
-    public function print_question_usage_by_activities($quba_array, $batch_mode = quiz_papercopy_batch_mode::NORMAL) 
+    public function print_question_usage_by_activities($quba_array, $batch_mode = quiz_papercopy_batch_mode::NORMAL, $include_barcodes = true) 
     {
         //set up PDF printing
         self::set_up_pdf();
@@ -517,11 +537,11 @@ class printable_copy_helper
             set_time_limit(1024);
 
             //then print the QUBA
-            $this->print_question_usage_by_activity($quba_id, $batch_mode);
+            $this->print_question_usage_by_activity($quba_id, $batch_mode, $include_barcodes);
         }
     }
 
-    public function print_question_usage_by_activity($quba_id, $batch_mode = quiz_papercopy_batch_mode::NORMAL)
+    public function print_question_usage_by_activity($quba_id, $batch_mode = quiz_papercopy_batch_mode::NORMAL, $include_barcodes = true)
     {
 
         //set up PDF printing
@@ -529,11 +549,34 @@ class printable_copy_helper
 
         //ensure the user has the correct permissions to print quizzes (the printing mechanism is a subsidiary of the paper copy report)
         require_capability('mod/quiz:viewreports', $this->context);
-        
+      
         //and call the internal printing method
-        $this->print_quba($quba_id, $batch_mode);
+        $this->print_quba($quba_id, $batch_mode, $include_barcodes);
     }
-    
+
+    static function create_pdf_header($title='Printable Copy') 
+    {
+        global $CFG;
+
+        //Create a PDF header.
+        $header = html_writer::start_tag('html');
+        $header .= html_writer::start_tag('head');
+        $header .= html_writer::tag('title', $title);
+        $header .= html_writer::empty_tag('link', array(
+            'href' => $CFG->wwwroot.'/theme/pdf/style/core.css',
+            'rel' => 'stylesheet',
+            'type' => 'text/css'
+        ));
+        $header .= html_writer::end_tag('head');
+        $header .= html_writer::start_tag('body');
+        return $header;
+    }
+
+    static function create_pdf_footer() 
+    {
+        return html_writer::end_tag('body');
+    }
+
     /**
      * Prints a given QUBA to a PDF object using the core PDF renderer, and returns the PDF.
      */
@@ -546,16 +589,49 @@ class printable_copy_helper
         $this->print_quba($quba_id, $batch_mode, $include_barcodes, $include_intro);
 
         //terminate output buffering, and retrieve the QUBA's data
-        $contents = ob_get_clean();
+        $contents = self::create_pdf_header($quba_id).ob_get_clean().self::create_pdf_footer();
 
         //TODO: document name?
         //return the newly created PDF
-        return core_pdf_renderer::output_pdf($contents, true);
+        return core_pdf_renderer::output_pdf($contents, true, 'quiz_'.$quba_id.'.pdf', self::render_barcode($quba_id));
+    }
+
+    protected function render_question_identifier($usage, $slot) {
+
+        // Get the requisite information.
+        $quba_id = $usage->get_id();
+        $question = $usage->get_question($slot);
+        $question_attempt = $usage->get_question_attempt($slot);
+
+        // Create the URL to the Question ID image.
+        $url = new moodle_url('/mod/quiz/report/papercopy/lib/questionid.php', array('quba' => $quba_id, 'q' => $question->id, 'qa' => $question_attempt->get_database_id()));
+
+        $content = html_writer::empty_tag('img', array('src' => $url));
+        $content .= $quba_id.'-'.$question->id.'-'.$question_attempt->get_database_id();
+
+        // And return a link to the image.
+        return html_writer::tag('div', $content, array('class' => 'questionid'));
+    }
+
+    protected function render_barcode($value, $text = '{barcode}') {
+        global $CFG;
+
+        //Create the core barcode to be added.
+        $image = html_writer::empty_tag('img', array('src' => $CFG->wwwroot.'/mod/quiz/report/papercopy/lib/barcode.php?s='.urlencode($value)));
+
+        //And add the header text with the barcode added.
+        $barcode = html_writer::start_tag('div', array('align' => 'center', 'id' => 'pageHeader'));
+        $barcode .= str_replace('{barcode}', $image, $text);
+        $barcode .= html_writer::end_tag('div');
+
+        return $barcode;
     }
 
 
-    protected function print_quba($quba_id, $batch_mode, $include_barcodes = true, $include_intro = true)
+    protected function print_quba($quba_id, $batch_mode, $include_barcodes = true, $include_intro = true, $include_page_numbers = true)
     {
+        global $OUTPUT;
+
         //get the default question display information
         $options = new question_display_options_pdf();
 
@@ -570,30 +646,48 @@ class printable_copy_helper
         {
 
             //start a new copy with the given margins
-            echo html_writer::start_tag('page', array('backtop' => '9mm', 'backbottom' => '0mm', 'backleft' => '0mm', 'backright' => '8mm'));
+            //TODO: HTML2PDF only
+            //echo html_writer::start_tag('page', array('backtop' => '9mm', 'backbottom' => '0mm', 'backleft' => '0mm', 'backright' => '8mm'));
+            $header = '';
 
             //start of page headers 
-            if($include_barcodes)
-            {
-                echo html_writer::start_tag('page_header');
-                echo html_writer::start_tag('div', array('align' => 'center'));
-                echo html_writer::tag('barcode', '', array('value' => $quba_id, 'style' => 'width: 40mm; height: 7mm;', 'label' => 'label')); 
-                echo html_writer::end_tag('div');
-                echo html_writer::end_tag('page_header');
-            }
+            //if($include_barcodes)
+            //{
+                //echo html_writer::start_tag('page_header');
+                $header .= self::render_barcode($quba_id);
+
+                //echo html_writer::end_tag('page_header');
+                $OUTPUT->header = $header;
+            //}
 
             //bookmark, for easy access from a PDF viewer
             echo html_writer::tag('bookmark', '', array('title' => get_string('copynumber', 'quiz_papercopy', $quba_id), 'level' => '0'));
 
             //print the quiz's introduction
             if(!empty($this->quiz->intro) && $include_intro)
-                echo html_writer::tag('p', self::insert_ids($this->quiz->intro, $quba_id));
-
+                echo html_writer::tag('div', self::insert_ids($this->quiz->intro, $quba_id), array('class' => 'introduction'));
+        
             //output each question
             foreach($slots as $slot => $question)
             {
-                $qbuf =  $usage->render_question($question, $options, $slot + 1);
-            
+                $qbuf = '';
+                
+                // If "include barcodes" is on, render the question-identifier code.
+                if($include_barcodes) {
+                    $qbuf .= html_writer::start_tag('div', array('class' => 'qwithidentifier'));
+                    $qbuf .= self::render_question_identifier($usage, $question);
+                }
+
+                // Render the question itself.
+                $qbuf .= $usage->render_question($question, $options, $slot + 1);
+
+                // If "include barcodes" is on, render the question-identifier code.
+                if($include_barcodes) {
+                    $qbuf .= html_writer::end_tag('div');
+                }
+
+
+
                 //if the core PDF renderer has purification turned off, purify the question locally
                 if(core_pdf_renderer::$do_not_purify)
                     $qbuf = core_pdf_renderer::clean_with_htmlpurify($qbuf);
@@ -601,9 +695,10 @@ class printable_copy_helper
                 echo $qbuf;
             }
 
-            echo html_writer::end_tag('page');
-        }
 
+            //echo html_writer::end_tag('page');
+        }
+    
         //if a key has been requested, output it as well
         if($batch_mode == quiz_papercopy_batch_mode::KEY_ONLY || $batch_mode == quiz_papercopy_batch_mode::WITH_KEY)
         {
@@ -641,10 +736,7 @@ class printable_copy_helper
 
             echo html_writer::start_tag('table');
             echo html_writer::end_tag('page');
-
-
-            }
-
+            
+        }
     }
-
 }

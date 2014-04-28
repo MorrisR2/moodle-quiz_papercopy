@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/quiz/report/papercopy/db" VERSION="20120829" COMMENT="XMLDB file for Moodle mod/quiz/report/papercopy"
+<XMLDB PATH="mod/quiz/report/papercopy/db" VERSION="20121016" COMMENT="XMLDB file for Moodle mod/quiz/report/papercopy"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../../lib/xmldb/xmldb.xsd"
 >
@@ -11,7 +11,8 @@
         <FIELD NAME="usages" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="comma-separated list of usages created by this batch" PREVIOUS="quiz" NEXT="prerendered"/>
         <FIELD NAME="prerendered" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false" COMMENT="A Moodle pathnamehash identifying a prerendered copy of this batch, if one exists." PREVIOUS="usages" NEXT="prerendered_with_key"/>
         <FIELD NAME="prerendered_with_key" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false" COMMENT="Pathnamehash of a prerendered file which contains answer keys with each attempt." PREVIOUS="prerendered" NEXT="prerendered_key_only"/>
-        <FIELD NAME="prerendered_key_only" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false" COMMENT="The pathnamehash of a prerendered batch which contains answer keys only." PREVIOUS="prerendered_with_key"/>
+        <FIELD NAME="prerendered_key_only" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false" COMMENT="The pathnamehash of a prerendered batch which contains answer keys only." PREVIOUS="prerendered_with_key" NEXT="entrymode"/>
+        <FIELD NAME="entrymode" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Specifies which entry mode the quizzes are optimized for" PREVIOUS="prerendered_key_only"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

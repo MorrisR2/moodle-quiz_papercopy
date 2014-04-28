@@ -36,7 +36,7 @@ require_once($CFG->dirroot . '/mod/quiz/report/papercopy/report.php');
  * @author     Kyle Temkin <ktemkin@binghamton.edu>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or latee
  */
-class quiz_papercopy_associate_users extends moodleform 
+class quiz_papercopy_associate_users_form extends moodleform 
 {
     protected $usages;
     protected $quiz_id;
