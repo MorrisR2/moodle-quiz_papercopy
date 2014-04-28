@@ -120,7 +120,7 @@ class quiz_papercopy_report extends quiz_default_report
             echo quiz_no_questions_message($quiz, $cm, $this->context);
 
         //otherwise, if we have no action, display the index page
-        else if (!$action) 
+        } else if (!$action) 
         {
             $this->maintain_batches();
             $this->display_index($importform, $createform);
