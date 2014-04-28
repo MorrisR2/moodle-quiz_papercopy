@@ -90,8 +90,8 @@ class quiz_papercopy_report extends quiz_default_report
         $this->quiz = $quiz;
         $this->cm = $cm;
         $this->course = $course;
-        $this->context = get_context_instance(CONTEXT_MODULE, $cm->id);
-        
+        $this->context = context_module::instance($cm->id);
+
         //get a reference to the current quiz
         $this->quizobj = $this->get_quiz_object();
 
@@ -108,7 +108,7 @@ class quiz_papercopy_report extends quiz_default_report
         //--- display the report:
 
         //if there are no questions in the quiz, display an error message
-        if (!quiz_questions_in_quiz($quiz->questions)) 
+        if (!$this->quizobj->has_questions()) {
             echo quiz_no_questions_message($quiz, $cm, $this->context);
 
         //otherwise, if we have no action, display the index page
@@ -920,7 +920,10 @@ class quiz_papercopy_report extends quiz_default_report
         $quiz_questions = $this->quizobj->get_questions();
 
         //randomize the question order, as requested
-        $quiz_questions = self::shuffle_questions($quiz_questions, $this->quiz->questions, $shuffle_mode, $fix_descriptions, $fix_first, $fix_last);
+        // $quiz_questions = self::shuffle_questions($quiz_questions, $this->quiz->questions, $shuffle_mode, $fix_descriptions, $fix_first, $fix_last);
+        // $quba = question_engine::make_questions_usage_by_activity('mod_quiz', $quizobj->get_context());
+        // $quba->set_preferred_behaviour($quizobj->get_quiz()->preferredbehaviour);
+
 
         //for each question in our online quiz
         foreach($quiz_questions as $slot => $qdata)
@@ -942,6 +945,7 @@ class quiz_papercopy_report extends quiz_default_report
         return $usage->get_id();
     }
 
+
     /**
      * Shuffles the given question set according to the rules specified by the user. See {@link quiz_papercopy_shuffle_modes}. 
      *
@@ -952,6 +956,8 @@ class quiz_papercopy_report extends quiz_default_report
      *
      * @return array    An associative array of questions to be included in the quiz.
      */
+
+    /*
     static function shuffle_questions($questions, $pagination = array(), $shuffle_mode = quiz_papercopy_shuffle_modes::MODE_SHUFFLE_IGNORE_PAGES, $fix_descriptions = false, $fix_first = false, $fix_last = false)
     {
 
@@ -1005,6 +1011,7 @@ class quiz_papercopy_report extends quiz_default_report
                 return self::merge_pages($pages);
         }
     }
+    */
 
     /**
      * Splits an array of question data into several smaller arrays according to the quiz'z pagination.
