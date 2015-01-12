@@ -77,7 +77,7 @@ elseif($cm_id) {
         if($prerender) {
 
             // Compose the URL at which this page is located...
-            $url = quiz_papercopy_report::get_paper_copy_url(array('id' => $cm_id, 'batch' => $batch, 'mode' => $batch_mode, 'prerender' => '1'));
+            $url = quiz_papercopy_report::get_paper_copy_url(array('id' => $cm_id, 'batch' => $batch_id, 'mode' => $batch_mode, 'prerender' => '1'));
 
             // ... and inform the page's renderer. Note that the pre-renderer does not use the render-to-PDF theme
             $PAGE->set_url($url).
@@ -90,7 +90,7 @@ elseif($cm_id) {
             exit();
 
         } else {
-
+            $PAGE->set_url(quiz_papercopy_report::get_paper_copy_url(array('id' => $cm_id, 'batch' => $batch_id, 'mode' => $batch_mode, 'prerender' => '0')));
             //print the entire batch
             $printer->print_batch($batch_id, quiz_papercopy_batch_mode::NORMAL, $as_zip);
         }
