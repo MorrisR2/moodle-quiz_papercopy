@@ -123,6 +123,7 @@ class quiz_papercopy_import_form extends moodleform
         //submit button
         $mform->addElement('header', 'submitform', get_string('generate', 'quiz_papercopy'));
         $mform->addElement('hidden', 'action', 'upload');
+        $mform->setType('action', PARAM_TEXT);
         $mform->addElement('submit', 'submitbutton', get_string('importdata', 'quiz_papercopy'));
     }
 }

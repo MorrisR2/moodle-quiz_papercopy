@@ -137,6 +137,7 @@ class quiz_papercopy_create_form extends moodleform
 
         //entry for the number of copies
         $mform->addElement('text', 'numcopies', get_string('numbercopies', 'quiz_papercopy'), 'size="4"');
+        $mform->setType('numcopies', PARAM_INT);
         $mform->setDefault('numcopies', $this->enrollment);
         $mform->addRule('numcopies', get_string('mustbenumeric', 'quiz_papercopy'), 'numeric');
 
@@ -166,6 +167,7 @@ class quiz_papercopy_create_form extends moodleform
         //submit button
         $mform->addElement('header', 'submitform', get_string('generate', 'quiz_papercopy'));
         $mform->addElement('hidden', 'action', 'create');
+        $mform->setType('action', PARAM_TEXT);
         $mform->addElement('submit', 'submitbutton', get_string('gendownload', 'quiz_papercopy'));
     }
 }
