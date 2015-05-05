@@ -568,7 +568,8 @@ class quiz_papercopy_report extends quiz_default_report
         $id = $DB->insert_record(self::BATCH_TABLE, $record);
 
         // Get a URL at which this paper copy can be viewed.
-        $url = self::get_paper_copy_url(array('id' => $this->cm->id, 'batch' => $id, 'zip' => ($copies != 1)));
+        // $url = self::get_paper_copy_url(array('id' => $this->cm->id, 'batch' => $id, 'zip' => ($copies != 1)));
+        $url = self::get_paper_copy_url(array('id' => $this->cm->id, 'batch' => $id));
 
         //add a refresh tag, so the given URL will automatically download
         echo html_writer::empty_tag('meta', array('http-equiv' => 'Refresh', 'content' => '0;'.$url->out(false)));
@@ -598,7 +599,7 @@ class quiz_papercopy_report extends quiz_default_report
         global $DB;
 
         //get the user's data
-        $user = $DB->get_record('user', array('id' => $user_id), 'lastname, firstname');
+        $user = $DB->get_record('user', array('id' => $user_id));
 
         //if no data was returned, return the default
         if(!$user)
@@ -682,14 +683,21 @@ class quiz_papercopy_report extends quiz_default_report
         $slots = $usage->get_slots();
 
         //enter the student's answers for each of the questions
-        foreach($slots as $slot)
+        foreach($slots as $slot) {
+            $letter2number = array('A' => 1, 'B' => 2, 'C' => 3, 'D' => 4);
+            if (array_key_exists($set['Question'.$slot], $letter2number)) {
+                $set['Question'.$slot] = $letter2number[$set['Question'.$slot]];
+            }
+            // echo "calling \$usage->process_action(\$slot, array('answer' => " . ($set['Question'.$slot] - 1) . "<br />\n";
             $usage->process_action($slot, array('answer' => $set['Question'.$slot] - 1));
+        }
 
         //set the attempt's owner to reflect the student who filled out the scantron
         $target_user = $this->user_id_from_scantron($set);
 
         //create a new attempt object, if requested, immediately close it, grading the attempt
-        $attempt = $this->build_attempt_from_usage($usage, $target_user, $finish, true);
+        // $attempt = $this->build_attempt_from_usage($usage, $target_user, $finish, true);
+        $attempt = $this->build_attempt_from_usage($usage, $target_user, true, true);
 
         //return the user's grade and id, on success
         return array('grade' => $attempt->sumgrades, 'user' => $attempt->userid);
@@ -802,7 +810,7 @@ class quiz_papercopy_report extends quiz_default_report
             $max_attempt = reset($max_attempt);
 
             //if no attempts exist, let this be the first attempt
-            if($max_attempt->max == null)
+            if(empty($max_attempt->max))
                 $attempt_number = 1;
 
             //otherwise, use the next available attempt number
@@ -830,8 +838,12 @@ class quiz_papercopy_report extends quiz_default_report
             $raw_course = $DB->get_record('course', array('id' => $this->course->id));
 
             //wrap the attempt data in an quiz_attempt object, and ask it to finish
+            $attempt->currentpage = 0;
             $attempt_object = new quiz_attempt($attempt, $this->quiz, $this->cm, $this->course, true);
-            $attempt_object->finish_attempt($time_now);
+            // $attempt_object->finish_attempt($time_now);
+            // $attempt_object->process_submitted_actions($time_now, false);
+            echo "calling process_finish($time_now, $finished)\n\n";
+            $attempt_object->process_finish($time_now, $finished);
         }
 
 
@@ -851,8 +863,9 @@ class quiz_papercopy_report extends quiz_default_report
      */
     static function parse_scantron_csv($csv_text, $omit_sparse = false)
     {
+        $csv_text = str_replace("\r", '', $csv_text); // remove carriage returns
         //break the CSV file into lines
-        $lines = explode("\n", $csv_text);
+        $lines = array_filter(explode("\n", $csv_text), 'strlen');
 
         //parse the file into raw CSV data
         foreach($lines as $num => $line)
