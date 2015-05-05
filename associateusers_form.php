@@ -183,6 +183,7 @@ class quiz_papercopy_associate_users extends moodleform
         //submit button
         $confirmation_message = addslashes_js(get_string('confirmcommit', 'quiz_papercopy')); 
         $mform->addElement('hidden', 'action', 'associate');
+        $mform->setType('action', PARAM_TEXT);
         $mform->addElement('submit', 'submitbutton', get_string('submitassociations', 'quiz_papercopy'), array('onClick' => 'return confirm("'.$confirmation_message.'")'));
     }
 
