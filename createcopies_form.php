@@ -165,7 +165,7 @@ class quiz_papercopy_create_form extends moodleform
         //TODO: get disabledIfs working for the options here?
 
         //submit button
-        $mform->addElement('header', 'submitform', get_string('generate', 'quiz_papercopy'));
+        // $mform->addElement('header', 'submitform', get_string('generate', 'quiz_papercopy'));
         $mform->addElement('hidden', 'action', 'create');
         $mform->setType('action', PARAM_TEXT);
         $mform->addElement('submit', 'submitbutton', get_string('gendownload', 'quiz_papercopy'));
