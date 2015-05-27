@@ -688,7 +688,6 @@ class quiz_papercopy_report extends quiz_default_report
             if (array_key_exists($set['Question'.$slot], $letter2number)) {
                 $set['Question'.$slot] = $letter2number[$set['Question'.$slot]];
             }
-            // echo "calling \$usage->process_action(\$slot, array('answer' => " . ($set['Question'.$slot] - 1) . "<br />\n";
             $usage->process_action($slot, array('answer' => $set['Question'.$slot] - 1));
         }
 
@@ -842,7 +841,6 @@ class quiz_papercopy_report extends quiz_default_report
             $attempt_object = new quiz_attempt($attempt, $this->quiz, $this->cm, $this->course, true);
             // $attempt_object->finish_attempt($time_now);
             // $attempt_object->process_submitted_actions($time_now, false);
-            echo "calling process_finish($time_now, $finished)\n\n";
             $attempt_object->process_finish($time_now, $finished);
         }
 
