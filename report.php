@@ -798,7 +798,7 @@ class quiz_papercopy_report extends quiz_default_report
         if($attempt_number === null)
         {
             //determine the maximum attempt value for that user/quiz combo
-            $max_attempt = $DB->get_records_sql('SELECT max("attempt") FROM {quiz_attempts} WHERE "userid" = ? AND "quiz" = ?', array($user_id, $this->quiz->id));
+            $max_attempt = $DB->get_records_sql('SELECT max("attempt") AS max FROM {quiz_attempts} WHERE "userid" = ? AND "quiz" = ?', array($user_id, $this->quiz->id));
             $max_attempt = reset($max_attempt);
 
             //if no attempts exist, let this be the first attempt
